@@ -1,7 +1,7 @@
 use crate::{DebuggerError, Result};
 use soroban_env_host::Host;
-use soroban_sdk::{Address, Bytes, Env, Symbol, Val};
-use tracing::info;
+use soroban_sdk::{Address, Env, InvokeError, Symbol, Val, Vec as SorobanVec};
+use tracing::{info, warn};
 
 /// Executes Soroban contracts in a test environment
 pub struct ContractExecutor {
@@ -17,9 +17,8 @@ impl ContractExecutor {
         // Create a test environment
         let env = Env::default();
 
-        // Upload the WASM code
-        let wasm_bytes = Bytes::from_slice(&env, &wasm);
-        let contract_address = env.register_contract_wasm(None, wasm_bytes);
+        // Register the contract with the WASM
+        let contract_address = env.register(wasm.as_slice(), ());
 
         info!("Contract registered successfully");
 
@@ -43,19 +42,58 @@ impl ContractExecutor {
             vec![]
         };
 
-        // Call the contract
-        let result: Val = self
-            .env
-            .try_invoke_contract(&self.contract_address, &func_symbol, parsed_args)
-            .map_err(|e| {
-                DebuggerError::ExecutionError(format!("Contract execution failed: {:?}", e))
-            })?
-            .map_err(|e| {
-                DebuggerError::ExecutionError(format!("Contract execution failed: {:?}", e))
-            })?;
+        // Create argument vector
+        let args_vec = if parsed_args.is_empty() {
+            SorobanVec::<Val>::new(&self.env)
+        } else {
+            SorobanVec::from_slice(&self.env, &parsed_args)
+        };
 
-        info!("Function executed successfully");
-        Ok(format!("{:?}", result))
+        // Call the contract
+        // try_invoke_contract returns Result<Result<Val, ConversionError>, Result<InvokeError, InvokeError>>
+        match self.env.try_invoke_contract::<Val, InvokeError>(
+            &self.contract_address,
+            &func_symbol,
+            args_vec,
+        ) {
+            Ok(Ok(val)) => {
+                info!("Function executed successfully");
+                Ok(format!("{:?}", val))
+            }
+            Ok(Err(conv_err)) => {
+                warn!("Return value conversion failed: {:?}", conv_err);
+                Err(DebuggerError::ExecutionError(format!(
+                    "Return value conversion failed: {:?}",
+                    conv_err
+                ))
+                .into())
+            }
+            Err(Ok(inv_err)) => match inv_err {
+                InvokeError::Contract(code) => {
+                    warn!("Contract returned error code: {}", code);
+                    Err(DebuggerError::ExecutionError(format!(
+                        "Contract error code: {}",
+                        code
+                    ))
+                    .into())
+                }
+                InvokeError::Abort => {
+                    warn!("Contract execution aborted");
+                    Err(DebuggerError::ExecutionError(
+                        "Contract execution aborted".to_string(),
+                    )
+                    .into())
+                }
+            },
+            Err(Err(inv_err)) => {
+                warn!("Invocation error conversion failed: {:?}", inv_err);
+                Err(DebuggerError::ExecutionError(format!(
+                    "Invocation error conversion failed: {:?}",
+                    inv_err
+                ))
+                .into())
+            }
+        }
     }
 
     /// Set initial storage state
