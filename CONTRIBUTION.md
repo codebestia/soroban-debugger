@@ -55,9 +55,26 @@ cargo build
 
 ### Running Tests
 
+
+To run all tests:
+
 ```sh
 cargo test
 ```
+
+To run a specific test or test file:
+
+```sh
+cargo test test_name
+cargo test --test integration/basic-tests
+```
+
+Tests should be:
+- Isolated and repeatable
+- Well-named and descriptive
+- Covering both typical and edge cases
+
+Add new tests for every new feature or bug fix. Place integration tests in the `tests/` directory and unit tests alongside the code in `src/`.
 
 ### Linting & Formatting
 
@@ -75,23 +92,91 @@ cargo run -- run --contract path/to/contract.wasm --function function_name
 ---
 ## Code Style & Quality
 
-We follow standard Rust conventions and best practices:
 
-- **Formatting:** Run `cargo fmt` before committing.
-- **Linting:** Run `cargo clippy` and address all warnings.
-- **Testing:** Write and update tests for all new or changed functionality.
-- **Documentation:** Update documentation and code comments as needed.
-- **Code Review:** All code is subject to review by project maintainers.
+## Code Style Guide
+
+Please follow these guidelines to ensure code consistency and maintainability:
+
+- **Formatting:**
+	- Use `cargo fmt` before committing. Code should be auto-formatted.
+	- Indent with 4 spaces, no tabs.
+	- Keep lines under 100 characters when possible.
+- **Linting:**
+	- Run `cargo clippy` and address all warnings before submitting code.
+- **Naming:**
+	- Use `snake_case` for variables and function names.
+	- Use `CamelCase` for type and struct names.
+	- Use `SCREAMING_SNAKE_CASE` for constants and statics.
+- **Documentation:**
+	- Document all public functions, structs, and modules using Rust doc comments (`///`).
+	- Add inline comments for complex logic.
+- **Testing:**
+	- Write unit and integration tests for new features and bug fixes.
+	- Place integration tests in the `tests/` directory.
+- **Error Handling:**
+	- Prefer `Result<T, E>` over panics for recoverable errors.
+	- Use meaningful error messages.
+- **General:**
+	- Remove unused code and imports.
+	- Avoid commented-out code in commits.
+	- Keep functions small and focused.
+
+---
 
 ---
 ## Commit Messages
 
-Please use clear, descriptive commit messages. Follow these guidelines:
 
-- Start with a verb in present tense (e.g., Add, Fix, Update).
-- Keep the subject line under 72 characters.
-- Use the body to explain _why_ the change was made, if necessary.
-- Reference related issues or PRs when applicable.
+## Commit Message Conventions
+
+We use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. This helps automate changelogs and makes the project history easier to understand.
+
+**Format:**
+
+```
+<type>(optional scope): short summary
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Common types:**
+
+- feat: new feature
+- fix: bug fix
+- docs: documentation changes
+- style: formatting, missing semicolons, etc. (no code change)
+- refactor: code change that neither fixes a bug nor adds a feature
+- perf: performance improvement
+- test: adding or correcting tests
+- chore: maintenance tasks (build scripts, tooling, etc.)
+
+**Examples:**
+
+```
+feat: add support for contract breakpoints
+
+fix: resolve panic when loading invalid WASM
+
+docs: update README with new usage example
+
+style: reformat engine.rs for readability
+
+refactor(debugger): extract stepper logic into module
+
+perf: optimize storage inspection for large contracts
+
+test: add integration tests for CLI parser
+
+chore: update dependencies and build scripts
+```
+
+**Tips:**
+- Use the imperative mood (e.g., "add" not "added" or "adds").
+- Reference issues or PRs in the footer if relevant (e.g., `Closes #123`).
+
+---
 
 ---
 ## Pull Request Process
@@ -178,125 +263,3 @@ We are committed to providing a welcoming and inclusive environment for everyone
 
 Thank you for helping make Soroban Debugger better!
 # Contributing to Soroban Debugger
-
-Thanks for your interest in contributing to the Soroban Debugger project!
-
-## Getting Started
-
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/yourusername/soroban-debugger.git`
-3. Create a new branch: `git checkout -b feature/your-feature-name`
-4. Make your changes
-5. Run tests: `cargo test`
-6. Run formatting: `cargo fmt`
-7. Run linter: `cargo clippy`
-8. Commit your changes: `git commit -am 'Add some feature'`
-9. Push to the branch: `git push origin feature/your-feature-name`
-10. Create a Pull Request
-
-## Development Setup
-
-### Prerequisites
-
-- Rust 1.75 or later
-- Soroban CLI (for testing)
-
-### Building
-
-```bash
-cargo build
-```
-
-### Running Tests
-
-```bash
-cargo test
-```
-
-### Running the CLI
-
-```bash
-cargo run -- run --contract path/to/contract.wasm --function function_name
-```
-
-## Project Structure
-
-- `src/cli/` - Command-line interface
-- `src/debugger/` - Core debugging engine
-- `src/runtime/` - WASM execution environment
-- `src/inspector/` - State inspection tools
-- `src/ui/` - Terminal user interface
-- `src/utils/` - Utility functions
-- `tests/` - Integration tests
-- `examples/` - Example usage
-
-## Code Style
-
-This project follows standard Rust conventions:
-
-- Run `cargo fmt` before committing
-- Run `cargo clippy` and fix any warnings
-- Write tests for new functionality
-- Update documentation as needed
-
-## Commit Messages
-
-- Use clear, descriptive commit messages
-- Start with a verb in present tense (Add, Fix, Update, etc.)
-- Keep the first line under 72 characters
-- Add detailed description in the body if needed
-
-## Pull Request Process
-
-1. Ensure all tests pass
-2. Update README.md if you've added features
-3. Update CHANGELOG.md with your changes
-4. Request review from maintainers
-
-## Issue Guidelines
-
-### Reporting Bugs
-
-Include:
-- Steps to reproduce
-- Expected behavior
-- Actual behavior
-- Contract WASM file (if relevant)
-- Error messages
-- Environment details
-
-### Suggesting Features
-
-Include:
-- Clear description of the feature
-- Use cases
-- Expected behavior
-- Any relevant examples
-
-## Areas for Contribution
-
-### Phase 1 (Current)
-- Basic CLI improvements
-- Better error messages
-- Storage inspection enhancements
-- Budget tracking improvements
-
-### Phase 2 (Upcoming)
-- Breakpoint management
-- Enhanced terminal UI
-- Call stack visualization
-- Execution replay
-
-### Phase 3 (Future)
-- WASM instrumentation
-- Source map support
-- Memory profiling
-- Performance analysis
-
-## Questions?
-
-Feel free to open an issue or reach out to the maintainers.
-
-## Code of Conduct
-
-Be respectful and constructive in all interactions.
